@@ -25,17 +25,18 @@ class StepDetectorService : Service(), SensorEventListener {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 
         val sensorManager: SensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
-        val countSensor: Sensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
+        val countSensor: Sensor? = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
 
+        if(countSensor != null){
+            Toast.makeText(this, "Step Detecting Start", Toast.LENGTH_SHORT).show()
+            sensorManager.registerListener(this, countSensor, SensorManager.SENSOR_DELAY_NORMAL)
 
-        Toast.makeText(this, "Step Detecting Start", Toast.LENGTH_SHORT).show()
-        sensorManager.registerListener(this, countSensor, SensorManager.SENSOR_DELAY_NORMAL)
+            GeneralHelper.updateNotification(this, this, PrefsHelper.getInt("FSteps"))
+            callback.subscribeSteps(PrefsHelper.getInt("FSteps"))
 
-
-        GeneralHelper.updateNotification(this, this, PrefsHelper.getInt("FSteps"))
-
-
-        callback.subscribeSteps(PrefsHelper.getInt("FSteps"))
+        }else{
+            Toast.makeText(this, "Sensor Not Detected", Toast.LENGTH_SHORT).show()
+        }
 
         return START_STICKY
     }
